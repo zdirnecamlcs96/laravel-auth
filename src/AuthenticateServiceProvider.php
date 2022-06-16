@@ -1,13 +1,13 @@
 <?php
 
-namespace Zdirnecamlcs96\Auth\Providers;
+namespace Zdirnecamlcs96\Auth;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 /**
  * Service provider
  */
-class ServiceProvider extends BaseServiceProvider
+class AuthenticateServiceProvider extends BaseServiceProvider
 {
     /**
      * Bootstrap the application services.
@@ -17,7 +17,8 @@ class ServiceProvider extends BaseServiceProvider
     public function boot()
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        $this->loadRoutesFrom(__DIR__.'/../../routes/auth.php');
+        $this->mergeConfigFrom(__DIR__.'/../config/auth.php', 'auth');
+        $this->registerRoutes();
     }
 
     /**
@@ -28,5 +29,10 @@ class ServiceProvider extends BaseServiceProvider
     public function register()
     {
         //
+    }
+
+    protected function registerRoutes()
+    {
+        $this->loadRoutesFrom(__DIR__.'/../routes/auth.php');
     }
 }
