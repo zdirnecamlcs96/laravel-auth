@@ -1,15 +1,31 @@
 {
     "name": "zdirnecamlcs96/laravel-auth",
     "description": "Authentication for laravel",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://satis.zdirnecam.dev/"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Zdirnecamlcs96\\Auth\\": "src/"
         }
     },
     "require": {
+        "zdirnecamlcs96/laravel-helpers": "v2.0.0-alpha",
         "laravel/passport": "^10.4",
         "spatie/laravel-permission": "^5.5",
-        "illuminate/support": "^9.9"
+        "illuminate/support": "^9.17",
+        "illuminate/database": "^9.17",
+        "illuminate/http": "^9.17"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zdirnecamlcs96\\Auth\\AuthenticateServiceProvider"
+            ]
+        }
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"
