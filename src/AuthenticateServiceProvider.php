@@ -2,6 +2,7 @@
 
 namespace Zdirnecamlcs96\Auth;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 /**
@@ -16,8 +17,14 @@ class AuthenticateServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/authentication.php' => config_path('authentication.php'),
+            ]);
+        }
+
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        $this->mergeConfigFrom(__DIR__.'/../config/auth.php', 'auth');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'authentication');
         $this->registerRoutes();
     }
 
@@ -28,11 +35,19 @@ class AuthenticateServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        //
+        $this->mergeConfigFrom(__DIR__.'/../config/authentication.php', 'authentication');
     }
 
     protected function registerRoutes()
     {
-        $this->loadRoutesFrom(__DIR__.'/../routes/auth.php');
+        Route::domain(config('authentication.endpoint'))
+        ->group(function() {
+            Route::group([
+                "as" => "authentication.",
+                "middleware" => "api"
+            ], function() {
+                $this->loadRoutesFrom(__DIR__.'/../routes/authentication.php');
+            });
+        });
     }
 }

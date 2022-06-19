@@ -59,7 +59,7 @@ class LoginController extends Controller
      */
     protected function attemptLogin(Request $request)
     {
-        $userClass = config("authentication.models.api");
+        $userClass = config("authentication.models.{$this->guard()}");
 
         $user = $userClass::where($this->username(), $request->get($this->username()))->first();
 
@@ -121,14 +121,14 @@ class LoginController extends Controller
         /**
          * Revoke all personal access token
          */
-        $user?->tokens()
+        $tokens = $user?->tokens()
             ->update([
                 'revoked_at' => Carbon::now()
             ]);
 
         match (config('authentication.mode')) {
-            ShouldAuthenticate::PASSPORT => $user->tokens()->revoke(),
-            ShouldAuthenticate::SANCTUM => $user->tokens()->delete()
+            ShouldAuthenticate::PASSPORT => $tokens->revoke(),
+            ShouldAuthenticate::SANCTUM => $tokens->delete()
         };
 
         /**
