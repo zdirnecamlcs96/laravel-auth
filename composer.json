@@ -18,7 +18,8 @@
         "spatie/laravel-permission": "^5.5",
         "illuminate/support": "^9.17",
         "illuminate/database": "^9.17",
-        "illuminate/http": "^9.17"
+        "illuminate/http": "^9.17",
+        "laravel/ui": "^3.4.6"
     },
     "extra": {
         "laravel": {
