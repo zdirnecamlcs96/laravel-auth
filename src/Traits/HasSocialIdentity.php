@@ -1,6 +1,6 @@
 <?php
 
-namespace Zdirnecamlcs96\Auth;
+namespace Zdirnecamlcs96\Auth\Traits;
 
 trait HasSocialIdentity
 {

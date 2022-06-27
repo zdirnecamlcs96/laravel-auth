@@ -9,8 +9,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Laravel\Sanctum\NewAccessToken;
-use Laravel\Passport\PersonalAccessTokenResult;
 use Zdirnecamlcs96\Auth\Contracts\ShouldAuthenticate;
 
 class LoginController extends Controller
@@ -59,9 +57,9 @@ class LoginController extends Controller
      */
     protected function attemptLogin(Request $request)
     {
-        $userClass = config("authentication.models.api");
+        $class = config("authentication.models.user");
 
-        $user = $userClass::where($this->username(), $request->get($this->username()))->first();
+        $user = $class::where($this->username(), $request->get($this->username()))->first();
 
         if (!empty($user)) {
             $hashCheck = Hash::check($request->get('password'), $user->password);
@@ -134,19 +132,7 @@ class LoginController extends Controller
         /**
          * Create new personal access token
          */
-        $token = $user->createToken('Authetication Token');
-
-        $tokenDB = $accessToken = null;
-
-        if (class_exists(NewAccessToken::class) && is_a($token, NewAccessToken::class)) {
-            $tokenDB = $token->accessToken;
-            $accessToken = $token->plainTextToken;
-        }
-
-        if (class_exists(PersonalAccessTokenResult::class) && is_a($token, PersonalAccessTokenResult::class)) {
-            $tokenDB = $token->token;
-            $accessToken = $token->accessToken;
-        }
+        list('token_record' => $tokenDB, 'access_token' => $accessToken) = $user->generateAccessToken();
 
         /**
          * Update FCM Token & Device Type

@@ -21,3 +21,14 @@ use Laravel\Sanctum\HasApiTokens;
 ```
 5. You may publish the `config/authetication.php` and modify the `mode`.
 6. All done. You may test your auth with [Postman](https://www.postman.com/).
+
+## Available Contracts
+| Contract | Description |
+| --- | --- |
+| - | - |
+
+## Available Tratis
+| Trait | Description |
+| --- | --- |
+| `Zdirnecamlcs96\Auth\Traits\HasSocialIdentity` | Add `SocialIdentity` relationship with third party token |
+| `Zdirnecamlcs96\Auth\Traits\HasContact` | Add `Contact` relationship with verification status |

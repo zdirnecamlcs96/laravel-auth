@@ -13,7 +13,11 @@ return [
     "endpoint" => env('API_URL', 'api.example.test'),
 
     "models" => [
-        "api" => "App\\Models\\User"
+        // User Class
+        "user" => "App\\Models\\User",
+
+        // Contact Class
+        "contact" => "Zdirnecamlcs96\\Auth\\Models\\Contact"
     ],
 
     /**
