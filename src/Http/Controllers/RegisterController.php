@@ -2,15 +2,15 @@
 
 namespace Zdirnecamlcs96\Auth\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Registered;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
 {
@@ -86,18 +86,26 @@ class RegisterController extends Controller
             return $this->__validationFail($validator);
         }
 
-        if($request->filled('email')){
-            $check_email = User::whereEmail($request->get('email'))
-                        ->whereHas('contact', function ($query) {
-                            $query->whereNotNull('verified_at');
-                        })
+        if($request->filled('email'))
+        {
+            $class = config("authentication.models.user");
+
+            $check_email = $class::whereEmail($request->get('email'))
+                        ->when(method_exists($class, 'contact'), fn($query) =>
+                            $query->whereHas('contact', fn($query) => $query->whereNotNull('verified_at'))
+                        )
                         ->exists();
+
             if($check_email) {
                 return $this->__apiFailed(Str::__label('Email_Has_Been_Taken', [], 'call-center'));
             }
         }
 
-        $user = User::create();
+        $data = array_intersect_key($request->all(), array_flip(array_keys(config('authentication.validation.register'))));
+
+        $data['password'] = bcrypt($request->get('password'));
+
+        $user = $class::create($data);
 
         event(new Registered($user));
 
@@ -118,18 +126,26 @@ class RegisterController extends Controller
      */
     protected function registered(Request $request, $user)
     {
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        $accessToken = $tokenResult->accessToken; // Passport
-        $token->update([
-            "expires_at" => $request->remember_me ? Carbon::now()->addWeeks(1) : $token->expires_at,
+        /**
+         * Create new personal access token
+         */
+        list('token_record' => $tokenDB, 'access_token' => $accessToken) = $user->generateAccessToken();
+
+        $tokenDB->update([
+            "expires_at" => $request->remember_me ? Carbon::now()->addWeeks(1) : $tokenDB->expires_at,
             'fcm_token' => $request->get('fcm_token')
         ]);
 
-        return $this->__apiSuccess('Register Successful.', [
+        $data = [
             "token" => $accessToken,
-            "phone_verified" => $user->contact()->whereNotNull('verified_at')->exists(),
-            "own_cars" => $user->own_cars->count() ?? 0
-        ]);
+        ];
+
+        $class = config("authentication.models.user");
+
+        if (method_exists($class, 'contact')) {
+            $data = array_merge($data, ["phone_verified" => $user->contactVerified()]);
+        }
+
+        return $this->__apiSuccess(__('authentication::auth.register.success'), $data);
     }
 }
