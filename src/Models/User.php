@@ -15,6 +15,9 @@ class User extends Authenticatable implements ShouldAuthenticate
 {
     use HasFactory, Notifiable, SoftDeletes;
 
+
+    const TOKEN_NAME = "Authetication Token";
+
     /**
      * The attributes that are mass assignable.
      *
@@ -62,7 +65,7 @@ class User extends Authenticatable implements ShouldAuthenticate
      */
     public function generateAccessToken()
     {
-        $token = $this->createToken('Authetication Token');
+        $token = $this->createToken(self::TOKEN_NAME);
 
         $tokenDB = $accessToken = null;
 
@@ -80,5 +83,13 @@ class User extends Authenticatable implements ShouldAuthenticate
             "token_record" => $tokenDB,
             "access_token" => $accessToken
         ];
+    }
+
+    public function revokePassportAccessTokens($except = null)
+    {
+        // Passport
+        foreach ($this->tokens()->where('name', self::TOKEN_NAME)->get() as $token) {
+            $token->revoke();
+        }
     }
 }

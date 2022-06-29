@@ -125,7 +125,7 @@ class LoginController extends Controller
             ]);
 
         match (config('authentication.mode')) {
-            ShouldAuthenticate::PASSPORT => $user->tokens()->revoke(),
+            ShouldAuthenticate::PASSPORT => $user->revokePassportAccessTokens(),
             ShouldAuthenticate::SANCTUM => $user->tokens()->delete()
         };
 
