@@ -29,7 +29,7 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
-            ...config('authentication.validation.login')
+            ...config('authentication.rules.login')
         ];
     }
 

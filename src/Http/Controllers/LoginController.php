@@ -45,7 +45,9 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $request->validate([
-            ...config('authentication.validation.login')
+            ...config('authentication.rules.login')
+        ], [
+            ...config('authentication.messages.login')
         ]);
     }
 
