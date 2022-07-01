@@ -23,7 +23,7 @@ return [
     /**
      * Validation Rules
      */
-    "validation" => [
+    "rules" => [
         "login" => [
             // Account Information (It's required. Please do not remove)
             "email" => 'required|string',
@@ -47,6 +47,15 @@ return [
             "fcm_token" => "required_unless:device_type,web|string|nullable",
 
             // Extra Information
+        ]
+    ],
+
+    "messages" => [
+        "login" => [
+            // Custom Message
+        ],
+        "register" => [
+            // Custom Message
         ]
     ]
 ];

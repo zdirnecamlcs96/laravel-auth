@@ -14,7 +14,7 @@ foreach (config('auth.guards') as $guard => $settings) {
     if (in_array($settings['driver'], [
         ShouldAuthenticate::PASSPORT,
         ShouldAuthenticate::SANCTUM
-    ])) {
+    ]) && $settings['provider']) {
 
         Route::match(['get', 'post'], 'third-party-login/{provider}/callback', [LoginController::class, 'thirdPartyLoginCallback'])->name('third-party-login.callback');
 

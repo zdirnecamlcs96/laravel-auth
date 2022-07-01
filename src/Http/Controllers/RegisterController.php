@@ -53,7 +53,9 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            ...config('authentication.validation.register')
+            ...config('authentication.rules.register')
+        ], [
+            ...config('authentication.messages.register')
         ]);
     }
 
@@ -101,7 +103,7 @@ class RegisterController extends Controller
             }
         }
 
-        $data = array_intersect_key($request->all(), array_flip(array_keys(config('authentication.validation.register'))));
+        $data = array_intersect_key($request->all(), array_flip(array_keys(config('authentication.rules.register'))));
 
         $data['password'] = bcrypt($request->get('password'));
 
