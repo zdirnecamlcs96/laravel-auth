@@ -47,6 +47,16 @@ return [
             "fcm_token" => "required_unless:device_type,web|string|nullable",
 
             // Extra Information
+        ],
+        "account.update" => [
+            'name' => ['required', 'string', 'max:255'],
+        ],
+        "password.reset" => [
+            'email' => ['required', 'string', 'email'],
+        ],
+        "password.change" => [
+            'old_password' => ['required', 'string'],
+            'new_password' => ['required', 'min:8', 'string', 'confirmed'],
         ]
     ],
 

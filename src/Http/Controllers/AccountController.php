@@ -30,14 +30,12 @@ class AccountController extends Controller
     public function update(Request $request)
     {
         $this->validate($request, [
-            "name" => "required|string",
-            "contact" => "required|string"
+            ...config('authentication.rules.account.update')
         ]);
 
-        $this->__currentUser()->update([
-            "name" => $request->get('name'),
-            "contact" => $request->get('contact')
-        ]);
+        $data = array_intersect_key($request->all(), array_flip(array_keys(config('authentication.rules.account.update'))));
+
+        $this->__currentUser()->update($data);
 
         return $this->__apiSuccess(__('authentication::profile.update'));
     }
@@ -51,8 +49,7 @@ class AccountController extends Controller
     public function changePassword(Request $request)
     {
         $this->validate($request, [
-            "old_password" => "required|string",
-            "new_password" => "required|string|confirmed|min:8",
+            ...config('authentication.rules.password.change')
         ]);
 
         $user = $this->__currentUser();
