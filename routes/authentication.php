@@ -9,6 +9,7 @@ use Zdirnecamlcs96\Auth\Http\Controllers\{
     ForgotPasswordController,
     ResetPasswordController
 };
+use Laravel\Passport\Passport;
 
 foreach (config('auth.guards') as $guard => $settings) {
     if (in_array($settings['driver'], [
@@ -16,9 +17,14 @@ foreach (config('auth.guards') as $guard => $settings) {
         ShouldAuthenticate::SANCTUM
     ]) && $settings['provider']) {
 
+        if ($settings['driver'] === ShouldAuthenticate::PASSPORT) {
+            Passport::routes();
+        }
+
+
         Route::match(['get', 'post'], 'third-party-login/{provider}/callback', [LoginController::class, 'thirdPartyLoginCallback'])->name('third-party-login.callback');
 
-        Route::group(['as' => "{$guard}." , 'middleware' => ["guest:{$guard}"]], function() {
+        Route::group(['as' => "{$guard}."], function() {
             Route::controller(LoginController::class)->group(function() {
                 Route::post('login', 'login')->name('login');
                 Route::post('third-party-login', 'thirdPartyLogin')->name('third-party-login');
