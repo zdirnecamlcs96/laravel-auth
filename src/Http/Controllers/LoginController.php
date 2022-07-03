@@ -3,13 +3,16 @@
 namespace Zdirnecamlcs96\Auth\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Validation\ValidationException;
+use Zdirnecamlcs96\Auth\Models\SocialIdentity;
 use Zdirnecamlcs96\Auth\Contracts\ShouldAuthenticate;
+use Illuminate\Support\Str;
+
 
 class LoginController extends Controller
 {
@@ -186,9 +189,36 @@ class LoginController extends Controller
     }
 
     /**
-     * Third Party Login
+     * Request Third Party Login Redirect URL
      *
-     * @param  mixed $request
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
+    public function thirdPartyLogin(Request $request)
+    {
+        $rules = [
+            "third_party_type" => "required|string|in:google,facebook,apple",
+            "mode" => "nullable|string"
+        ];
+
+        $type = $request->get('third_party_type');
+
+        $provider = ucfirst($type);
+
+        $this->validate($request, $rules);
+
+        return $this->__apiSuccess("Redirecting to {$provider}...", [
+            "url" => Socialite::driver($type)
+                        ->stateless()
+                        ->redirect()
+                        ->getTargetUrl()
+        ]);
+    }
+
+    /**
+     * Third Party Login Callback
+     *
+     * @param  \Illuminate\Http\Request  $request
      * @param  mixed $provider
      * @return void
      */
@@ -205,13 +235,13 @@ class LoginController extends Controller
             ];
 
         }else {
-            Log::info("Processing $provider login...");
+            // Log::info("Processing $provider login...");
 
             $custom = [];
 
             $socialite = Socialite::driver($provider)->stateless()->user();
 
-            Log::info("Fetched $provider user.");
+            // Log::info("Fetched $provider user.");
 
             if(!empty($socialite))
             {
@@ -248,9 +278,9 @@ class LoginController extends Controller
             }
         }
 
-        $url = config('app.web_app_url');
+        $url = config('authentication.third_party.app_login_url');
 
-        return redirect()->to('https://' . $url . "/login?" . http_build_query($data));
+        return redirect()->to($url . http_build_query($data));
 
     }
 }

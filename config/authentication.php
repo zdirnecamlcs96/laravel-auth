@@ -3,15 +3,24 @@
 return [
 
     /**
+     * ======================================
      * Available: passport, sanctum
+     * ======================================
      */
     "mode" => env('AUTH_MODE', 'passport'),
 
     /**
+     * ======================================
      * API endpoint
+     * ======================================
      */
     "endpoint" => env('API_URL', 'api.example.test'),
 
+    /**
+     * ======================================
+     * Model Classes
+     * ======================================
+     */
     "models" => [
         // User Class
         "user" => "App\\Models\\User",
@@ -21,7 +30,9 @@ return [
     ],
 
     /**
+     * ======================================
      * Validation Rules
+     * ======================================
      */
     "rules" => [
         "login" => [
@@ -60,12 +71,34 @@ return [
         ]
     ],
 
+    /**
+     * ======================================
+     * Validation Custom Message
+     * ======================================
+     */
     "messages" => [
         "login" => [
-            // Custom Message
+            // ...
         ],
         "register" => [
-            // Custom Message
+            // ...
         ]
+    ],
+
+    /**
+     * ======================================
+     * Third Party Configuration
+     * ======================================
+     *
+     * Before you start, please make sure to setup the client key and secret key for each of defined provider.
+     * Current supported provider: Google, Facebook, Apple
+     *
+     * Attributes:
+     * "app_login_url" - Redirect back to application's login page once third party callback verified completed
+     *
+     */
+
+    "third_party" => [
+        "app_login_url" => env('THIRD_PARTY_APP_LOGIN_URL', "https://localhost:8000/login")
     ]
 ];
