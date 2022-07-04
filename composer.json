@@ -19,7 +19,8 @@
         "illuminate/support": "^9.17",
         "illuminate/database": "^9.17",
         "illuminate/http": "^9.17",
-        "laravel/ui": "^3.4.6"
+        "laravel/ui": "^3.4.6",
+        "laravel/socialite": "^5.5"
     },
     "extra": {
         "laravel": {
