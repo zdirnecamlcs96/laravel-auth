@@ -59,15 +59,19 @@ return [
 
             // Extra Information
         ],
-        "account.update" => [
-            'name' => ['required', 'string', 'max:255'],
+        "account" => [
+            "update" => [
+                'name' => ['required', 'string', 'max:255'],
+            ]
         ],
-        "password.reset" => [
-            'email' => ['required', 'string', 'email'],
-        ],
-        "password.change" => [
-            'old_password' => ['required', 'string'],
-            'new_password' => ['required', 'min:8', 'string', 'confirmed'],
+        "password" => [
+            "reset" => [
+                'email' => ['required', 'string', 'email'],
+            ],
+            "change" => [
+                'old_password' => ['required', 'string'],
+                'new_password' => ['required', 'min:8', 'string', 'confirmed'],
+            ]
         ]
     ],
 
