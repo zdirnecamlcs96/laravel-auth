@@ -13,7 +13,7 @@
         }
     },
     "require": {
-        "zdirnecamlcs96/laravel-helpers": "v2.0.0-alpha",
+        "zdirnecamlcs96/laravel-helpers": "^v2.1.0",
         "laravel/passport": "^10.4",
         "spatie/laravel-permission": "^5.5",
         "illuminate/support": "^9.17",
