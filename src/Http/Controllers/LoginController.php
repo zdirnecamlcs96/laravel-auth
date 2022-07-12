@@ -116,7 +116,7 @@ class LoginController extends Controller
     protected function sendFailedLoginResponse(Request $request)
     {
         throw ValidationException::withMessages([
-            $this->username() => [trans('auth.failed')],
+            $this->username() => [ __($request->filled('third_party_type') === "web") ? 'auth.third_party_expired' : 'auth.failed' ],
         ]);
     }
 
@@ -216,7 +216,7 @@ class LoginController extends Controller
 
         $socialIdentity = SocialIdentity::whereProviderName($provider_name)
             ->whereProviderId($provider_id)
-            ->when($isWeb, fn($query) => $query->whereToken($tpl_token))
+            ->when($isWeb, fn($query) => $query->whereNotNull('token')->whereToken($tpl_token))
             ->first();
 
         if(empty($socialIdentity)) {
@@ -242,12 +242,18 @@ class LoginController extends Controller
         if (!$user) {
             $user = User::create([
                 'email' => $email,
-                'name'  => $username,
+                // 'name'  => $username,
+                'password' => bcrypt(Str::random(16))
             ]);
 
             $socialIdentity->user()->associate($user);
             $socialIdentity->save();
         }
+
+        // Reset social token once login success
+        $socialIdentity->update([
+            "token" => null
+        ]);
 
         // Upload profile image
         // if ($user->profileImage()->doesntExist() && $request->filled('third_party_image')) {
@@ -314,38 +320,40 @@ class LoginController extends Controller
             ];
 
         }else {
-            // Log::info("Processing $provider login...");
+            try {
+                // Log::info("Processing $provider login...");
+                $custom = [];
+                $socialite = Socialite::driver($provider)->stateless()->user();
+                // Log::info("Fetched $provider user.");
+                if(!empty($socialite))
+                {
+                    $id = $socialite->id;
+                    $avatar = $socialite->avatar;
+                    $email = $socialite->email;
+                    $username = $this->__isEmpty($socialite->name, 'User' . rand('00000000', '99999999'));
 
-            $custom = [];
+                    $socialIdentity = SocialIdentity::updateOrCreate([
+                        "provider_id" => $id,
+                        "provider_name" => $provider
+                    ],[
+                        "token" => Str::uuid(32),
+                        "token_expired_at" => Carbon::now()->addMinutes(5)
+                    ]);
 
-            $socialite = Socialite::driver($provider)->stateless()->user();
-
-            // Log::info("Fetched $provider user.");
-
-            if(!empty($socialite))
-            {
-                $id = $socialite->id;
-                $avatar = $socialite->avatar;
-                $email = $socialite->email;
-                $username = $this->__isEmpty($socialite->name, 'User' . rand('00000000', '99999999'));
-
-                $socialIdentity = SocialIdentity::updateOrCreate([
-                    "provider_id" => $id,
-                    "provider_name" => $provider
-                ],[
-                    "token" => Str::uuid(32),
-                    "token_expired_at" => Carbon::now()->addMinutes(5)
-                ]);
-
+                    $data = [
+                        "tpl_provider" => $provider,
+                        "tpl_token" => $socialIdentity->token?->toString(),
+                        "uid" => $id,
+                        "avatar" => $avatar,
+                        "email" => $email,
+                        "username" => $username,
+                    ];
+                }
+            } catch (\Throwable $th) {
                 $data = [
                     "tpl_provider" => $provider,
-                    "tpl_token" => $socialIdentity->token,
-                    "uid" => $id,
-                    "avatar" => $avatar,
-                    "email" => $email,
-                    "username" => $username,
+                    "tpl_error" => ucfirst($provider) . " login error. Please try again later."
                 ];
-
             }
         }
 

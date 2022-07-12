@@ -10,8 +10,8 @@ class SocialIdentity extends Model
 
     use SoftDeletes;
 
-    protected $fillable = [
-        'user_id', 'provider_name', 'provider_id', 'token', 'token_expired_at'
+    protected $guarded = [
+        "id", "created_at", "updated_at"
     ];
 
     public function user()
