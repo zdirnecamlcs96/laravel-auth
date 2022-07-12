@@ -12,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 use Zdirnecamlcs96\Auth\Models\SocialIdentity;
 use Zdirnecamlcs96\Auth\Contracts\ShouldAuthenticate;
 use Illuminate\Support\Str;
+use Zdirnecamlcs96\Auth\Models\User;
+use Zdirnecamlcs96\Auth\Models\Media;
 
 
 class LoginController extends Controller
@@ -28,7 +30,12 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $this->validateLogin($request);
-        $user = $this->attemptLogin($request);
+
+        if ($request->filled('third_party_type')) {
+            $user = $this->thirdPartyLogin($request);
+        } else {
+            $user = $this->attemptLogin($request);
+        }
 
         if ($user) {
             return $this->sendLoginResponse($user, $request);
@@ -189,12 +196,84 @@ class LoginController extends Controller
     }
 
     /**
+     * Attempt to log the user into the application with social login.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function thirdPartyLogin(Request $request)
+    {
+        $device_type = $request->get('device_type');
+        $email = $request->get('email');
+        $provider_id = $request->get('third_party_id');
+        $provider_name = $request->get('third_party_type'); // tpl_provider
+        $tpl_token = $request->get('third_party_token');
+        $provider_image = $request->get('third_party_image');
+        $username = $this->__requestFilled('third_party_username', 'User' . rand('00000000', '99999999'));
+
+        $user = null;
+        $isWeb = $device_type === "web";
+
+        $socialIdentity = SocialIdentity::whereProviderName($provider_name)
+            ->whereProviderId($provider_id)
+            ->when($isWeb, fn($query) => $query->whereToken($tpl_token))
+            ->first();
+
+        if(empty($socialIdentity)) {
+
+            if($isWeb) {
+                return false;
+            }
+
+            $socialIdentity = SocialIdentity::create([
+                "provider_id" => $provider_id,
+                "provider_name" => $provider_name,
+            ]);
+        }
+
+        // Check if token expired
+        if ($isWeb && Carbon::now()->isAfter($socialIdentity->token_expired_at)) {
+            return false;
+        }
+
+        $user = $socialIdentity->user;
+
+        // Create user account if not found
+        if (!$user) {
+            $user = User::create([
+                'email' => $email,
+                'name'  => $username,
+            ]);
+
+            $socialIdentity->user()->associate($user);
+            $socialIdentity->save();
+        }
+
+        // Upload profile image
+        // if ($user->profileImage()->doesntExist() && $request->filled('third_party_image')) {
+        //     $file = $this->__storeImage($provider_image, Media::PROFILE_IMAGE);
+
+        //     $user->profileImage()->create([
+        //         "name" => $file->filename,
+        //         "original_name" => $provider_image,
+        //         "extension" => $file->extension,
+        //         "mime" => $file->mime(),
+        //         "size" => $file->filesize(),
+        //         "path" => Media::PATH_TO_STORAGE,
+        //         "ip_address" => $request->ip()
+        //     ]);
+        // }
+
+        return $user;
+    }
+
+    /**
      * Request Third Party Login Redirect URL
      *
      * @param  \Illuminate\Http\Request  $request
      * @return void
      */
-    public function thirdPartyLogin(Request $request)
+    public function statelessThirdParty(Request $request)
     {
         $rules = [
             "third_party_type" => "required|string|in:google,facebook,apple",
@@ -222,7 +301,7 @@ class LoginController extends Controller
      * @param  mixed $provider
      * @return void
      */
-    public function thirdPartyLoginCallback(Request $request, $provider)
+    public function statelessThirdPartyCallback(Request $request, $provider)
     {
 
         $data = [];
@@ -230,8 +309,8 @@ class LoginController extends Controller
         if($request->has('error')) {
             $err_reason = ucfirst($provider) . " login failed. (" . ucwords(mb_ereg_replace('_', ' ', $request->get('error_reason'))) . ")";
             $data = [
-                "tpl_success" => $provider,
-                "error" => $err_reason
+                "tpl_provider" => $provider,
+                "tpl_error" => $err_reason
             ];
 
         }else {
@@ -250,29 +329,21 @@ class LoginController extends Controller
                 $email = $socialite->email;
                 $username = $this->__isEmpty($socialite->name, 'User' . rand('00000000', '99999999'));
 
-                $account = SocialIdentity::whereProviderName($provider)
-                                ->whereProviderId($id)
-                                ->first();
-
-                if (empty($account)) {
-                    $account = new SocialIdentity([
-                        "provider_id" => $id,
-                        "provider_name" => $provider
-                    ]);
-                    $account->save();
-                }
-
-                $account->update([
+                $socialIdentity = SocialIdentity::updateOrCreate([
+                    "provider_id" => $id,
+                    "provider_name" => $provider
+                ],[
                     "token" => Str::uuid(32),
                     "token_expired_at" => Carbon::now()->addMinutes(5)
                 ]);
 
                 $data = [
-                    "tpl_success" => $provider,
+                    "tpl_provider" => $provider,
+                    "tpl_token" => $socialIdentity->token,
                     "uid" => $id,
                     "avatar" => $avatar,
                     "email" => $email,
-                    "username" => $username
+                    "username" => $username,
                 ];
 
             }
@@ -280,7 +351,7 @@ class LoginController extends Controller
 
         $url = config('authentication.third_party.app_login_url');
 
-        return redirect()->to($url . http_build_query($data));
+        return redirect()->to($url ."?". http_build_query($data));
 
     }
 }
