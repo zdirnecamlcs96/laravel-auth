@@ -99,10 +99,12 @@ return [
      *
      * Attributes:
      * "app_login_url" - Redirect back to application's login page once third party callback verified completed
+     * "username" - User account name column
      *
      */
 
     "third_party" => [
-        "app_login_url" => env('THIRD_PARTY_APP_LOGIN_URL', "https://localhost:8000/login")
+        "app_login_url" => env('THIRD_PARTY_APP_LOGIN_URL', "https://localhost:8000/login"),
+        "username" => "name"
     ]
 ];
