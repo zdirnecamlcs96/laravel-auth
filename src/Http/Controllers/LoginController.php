@@ -280,7 +280,7 @@ class LoginController extends Controller
 
         $url = config('authentication.third_party.app_login_url');
 
-        return redirect()->to($url . http_build_query($data));
+        return redirect()->to($url ."?". http_build_query($data));
 
     }
 }
