@@ -116,7 +116,7 @@ class LoginController extends Controller
     protected function sendFailedLoginResponse(Request $request)
     {
         throw ValidationException::withMessages([
-            $this->username() => [ __($request->filled('third_party_type') === "web") ? 'auth.third_party_expired' : 'auth.failed' ],
+            $this->username() => [ __($request->filled('third_party_type') === "web" ? 'auth.third_party_expired' : 'auth.failed') ],
         ]);
     }
 
