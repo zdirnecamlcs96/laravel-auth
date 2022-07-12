@@ -22,12 +22,12 @@ foreach (config('auth.guards') as $guard => $settings) {
         }
 
 
-        Route::match(['get', 'post'], 'third-party-login/{provider}/callback', [LoginController::class, 'thirdPartyLoginCallback'])->name('third-party-login.callback');
+        Route::match(['get', 'post'], 'third-party-login/{provider}/callback', [LoginController::class, 'statelessThirdPartyCallback'])->name('third-party-login.callback');
 
         Route::group(['as' => "{$guard}."], function() {
             Route::controller(LoginController::class)->group(function() {
                 Route::post('login', 'login')->name('login');
-                Route::post('third-party-login', 'thirdPartyLogin')->name('third-party-login');
+                Route::post('third-party-login', 'statelessThirdParty')->name('third-party-login');
             });
             Route::post('register', [RegisterController::class, 'register']);
             Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
