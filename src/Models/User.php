@@ -15,7 +15,6 @@ class User extends Authenticatable implements ShouldAuthenticate
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-
     const TOKEN_NAME = "Authetication Token";
 
     /**

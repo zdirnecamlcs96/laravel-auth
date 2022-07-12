@@ -44,6 +44,11 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
+    private function getUserClass()
+    {
+        return config("authentication.models.user");
+    }
+
     /**
      * Get a validator for an incoming registration request.
      *
@@ -90,10 +95,8 @@ class RegisterController extends Controller
 
         if($request->filled('email'))
         {
-            $class = config("authentication.models.user");
-
-            $check_email = $class::whereEmail($request->get('email'))
-                        ->when(method_exists($class, 'contact'), fn($query) =>
+            $check_email = $this->getUserClass()::whereEmail($request->get('email'))
+                        ->when(method_exists($this->getUserClass(), 'contact'), fn($query) =>
                             $query->whereHas('contact', fn($query) => $query->whereNotNull('verified_at'))
                         )
                         ->exists();
@@ -107,7 +110,7 @@ class RegisterController extends Controller
 
         $data['password'] = bcrypt($request->get('password'));
 
-        $user = $class::create($data);
+        $user = $this->getUserClass()::create($data);
 
         event(new Registered($user));
 
@@ -142,9 +145,7 @@ class RegisterController extends Controller
             "token" => $accessToken,
         ];
 
-        $class = config("authentication.models.user");
-
-        if (method_exists($class, 'contact')) {
+        if (method_exists($this->getUserClass(), 'contact')) {
             $data = array_merge($data, ["phone_verified" => $user->contactVerified()]);
         }
 

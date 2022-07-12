@@ -12,12 +12,16 @@ use Illuminate\Validation\ValidationException;
 use Zdirnecamlcs96\Auth\Models\SocialIdentity;
 use Zdirnecamlcs96\Auth\Contracts\ShouldAuthenticate;
 use Illuminate\Support\Str;
-use Zdirnecamlcs96\Auth\Models\User;
 use Zdirnecamlcs96\Auth\Models\Media;
 
 
 class LoginController extends Controller
 {
+
+    private function getUserClass()
+    {
+        return config("authentication.models.user");
+    }
 
     /**
      * Handle a login request to the application.
@@ -69,9 +73,8 @@ class LoginController extends Controller
      */
     protected function attemptLogin(Request $request)
     {
-        $class = config("authentication.models.user");
 
-        $user = $class::where($this->username(), $request->get($this->username()))->first();
+        $user = $this->getUserClass()::where($this->username(), $request->get($this->username()))->first();
 
         if (!empty($user)) {
             $hashCheck = Hash::check($request->get('password'), $user->password);
@@ -240,7 +243,7 @@ class LoginController extends Controller
 
         // Create user account if not found
         if (!$user) {
-            $user = User::create([
+            $user = $this->getUserClass()::create([
                 'email' => $email,
                 // 'name'  => $username,
                 'password' => bcrypt(Str::random(16))
