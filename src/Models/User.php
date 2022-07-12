@@ -10,10 +10,11 @@ use Laravel\Passport\PersonalAccessTokenResult;
 use Zdirnecamlcs96\Auth\Contracts\ShouldAuthenticate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\User as Base;
 
-class User extends Base
+class User extends Authenticatable implements ShouldAuthenticate
 {
+    use HasFactory, Notifiable, SoftDeletes;
+
     const TOKEN_NAME = "Authetication Token";
 
     /**

@@ -16,7 +16,7 @@ class SocialIdentity extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(config("authentication.models.user"));
     }
 
     function contact()

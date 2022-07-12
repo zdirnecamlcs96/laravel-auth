@@ -23,7 +23,7 @@ return new class extends Migration
                 }
                 if (!Schema::hasColumn('fcm_token', 'device_type')) {
                     $table->string('fcm_token')->nullable();
-                    $table->enum('device_type', ['android', 'ios'])->nullable()->default('ios');
+                    $table->enum('device_type', ['android', 'ios', 'web'])->nullable();
                 }
             });
         }
