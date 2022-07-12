@@ -245,12 +245,19 @@ class LoginController extends Controller
         if (!$user) {
             $user = $this->getUserClass()::create([
                 'email' => $email,
-                // 'name'  => $username,
+                config('authentication.third_party.username')  => $username,
                 'password' => bcrypt(Str::random(16))
             ]);
 
             $socialIdentity->user()->associate($user);
             $socialIdentity->save();
+        }
+
+        if (!$user->{config('authentication.third_party.username')})
+        {
+            $user->update([
+                config('authentication.third_party.username')  => $username,
+            ]);
         }
 
         // Reset social token once login success
