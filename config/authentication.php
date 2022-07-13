@@ -104,7 +104,15 @@ return [
      */
 
     "third_party" => [
-        "app_login_url" => env('THIRD_PARTY_APP_LOGIN_URL', "https://localhost:8000/login"),
+        "app_login_url" => env("THIRD_PARTY_APP_LOGIN_URL", "https://localhost:8000/login"),
         "username" => "name"
+    ],
+
+    "reset_password" => [
+        // GET
+        "password_reset_route" => env("APP_PASSWORD_RESET_ROUTE", "authentication.api.password.reset"),
+
+        // POST
+        "password_update_route" => env("APP_PASSWORD_RESET_ROUTE", "authentication.api.password.update")
     ]
 ];

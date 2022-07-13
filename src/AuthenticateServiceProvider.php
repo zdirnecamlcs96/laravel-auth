@@ -4,6 +4,7 @@ namespace Zdirnecamlcs96\Auth;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Auth\Notifications\ResetPassword;
 
 /**
  * Service provider
@@ -26,6 +27,13 @@ class AuthenticateServiceProvider extends BaseServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'authentication');
         $this->registerRoutes();
+
+        ResetPassword::createUrlUsing(function ($notifiable, $token) {
+            return url(route(config('authentication.reset_password.password_reset_route'), [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false));
+        });
     }
 
     /**
