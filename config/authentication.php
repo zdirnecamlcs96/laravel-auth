@@ -97,9 +97,8 @@ return [
      * Before you start, please make sure to setup the client key and secret key for each of defined provider.
      * Current supported provider: Google, Facebook, Apple
      *
-     * Attributes:
-     * "app_login_url" - Redirect back to application's login page once third party callback verified completed
-     * "username" - User account name column
+     * `app_login_url` - Redirect back to application's login page once third party callback verified completed
+     * `username` - User account name column
      *
      */
 
@@ -108,11 +107,28 @@ return [
         "username" => "name"
     ],
 
+    /**
+     * ======================================
+     * Reset Password Configuration
+     * ======================================
+     *
+     * Custom reset password configuration used for different link
+     *
+     * `password_reset_route` - Email redirect route (Default: link to api password)
+     * `password_reset_redirect` - Frontend view link (Web Application)
+     * `password_update_route` - Password reset route
+     *
+     *
+     */
     "reset_password" => [
         // GET
-        "password_reset_route" => env("APP_PASSWORD_RESET_ROUTE", "authentication.api.password.reset"),
+        "password_reset_route" => "authentication.api.password.reset",
+
+        // View
+        "password_reset_redirect" => env("RESET_PASSWORD_VIEW_REDIRECT", NULL),
 
         // POST
-        "password_update_route" => env("APP_PASSWORD_RESET_ROUTE", "authentication.api.password.update")
+        "password_update_route" => "authentication.api.password.update",
+
     ]
 ];
