@@ -34,7 +34,7 @@ class ForgotPasswordController extends Controller
         $message = __('authentication::auth.reset-password.success');
 
         return $request->wantsJson()
-                    ? new JsonResponse(['message' => $message], 200)
+                    ? $this->__apiSuccess($message)
                     : back()->with('status', $message);
     }
 
