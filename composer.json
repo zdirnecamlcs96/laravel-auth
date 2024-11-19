@@ -1,12 +1,6 @@
 {
     "name": "zdirnecamlcs96/laravel-auth",
     "description": "Authentication for laravel",
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://satis.zdirnecam.dev/"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Zdirnecamlcs96\\Auth\\": "src/"
